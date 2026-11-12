@@ -4,7 +4,33 @@ const { query } = require('../../config/db');
 const settings = require('../../utils/settings');
 const { ApiError } = require('../../middleware/errorHandler');
 
-const PUBLIC_PAGES = new Set(['home', 'about', 'footer', 'privacy', 'terms', 'impressum']);
+/**
+ * Every page whose wording lives in content_blocks. The rule is that any
+ * sentence a visitor reads is stored here, so nothing on the public site is
+ * written into the React code where the admin panel cannot reach it.
+ */
+const PUBLIC_PAGES = new Set([
+  'home',
+  'about',
+  'vehicles',
+  'services',
+  'gallery',
+  'reviews',
+  'offers',
+  'contact',
+  'book',
+  // Shared wording for the pages built from one record.
+  'vehicle_detail',
+  'service_detail',
+  'city_detail',
+  'category',
+  'not_found',
+  'footer',
+  'legal',
+  'privacy',
+  'terms',
+  'impressum',
+]);
 
 /** Turn content_blocks rows into a flat { block_key: value } object. */
 function toMap(rows) {
@@ -48,6 +74,9 @@ async function getHome(req, res) {
     sectionMeta: sections,
     content,
     lists: {
+      // One group per hero slide: headline, accent, text, background image.
+      hero_slides: parseItems(content.hero_slides),
+      hero_stat_labels: parseItems(content.hero_stat_labels),
       trust_items: parseItems(content.trust_items),
       why_items: parseItems(content.why_items),
       how_steps: parseItems(content.how_steps),

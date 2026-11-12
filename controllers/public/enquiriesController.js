@@ -7,6 +7,7 @@ const settings = require('../../utils/settings');
 const mailer = require('../../utils/mailer');
 const { logActivity } = require('../../utils/activityLog');
 const { buildMessage, waLink } = require('../../utils/whatsapp');
+const { normalizeWhatsAppNumber } = require('../../utils/phone');
 
 function optionalBoundedInteger(value, label, min, max) {
   const raw = v.str(value);
@@ -69,7 +70,7 @@ async function create(req, res) {
   if (fullName.length > 160) {
     throw ApiError.badRequest('Name must be 160 characters or fewer.', 'bad_full_name');
   }
-  const phone = v.str(body.phone);
+  const phone = normalizeWhatsAppNumber(body.phone);
   if (!/^\d{7,15}$/.test(phone)) {
     throw ApiError.badRequest('Phone number must contain 7 to 15 digits.', 'bad_phone');
   }

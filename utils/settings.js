@@ -1,6 +1,7 @@
 'use strict';
 
 const { query, transaction } = require('../config/db');
+const { normalizeWhatsAppNumber } = require('./phone');
 
 /**
  * Settings are read on almost every public request (WhatsApp number, phone,
@@ -69,7 +70,7 @@ async function setMany(values) {
 /** Digits-only WhatsApp number, ready for a wa.me link. */
 async function whatsappNumber() {
   const raw = await get('whatsapp_number', '41000000000');
-  return String(raw).replace(/\D/g, '');
+  return normalizeWhatsAppNumber(raw);
 }
 
 module.exports = { loadAll, invalidate, get, publicBundle, setMany, whatsappNumber };

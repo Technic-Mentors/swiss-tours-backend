@@ -1,6 +1,7 @@
 'use strict';
 
 const settings = require('./settings');
+const { normalizeWhatsAppNumber } = require('./phone');
 
 /**
  * Fill {vehicle} {city} {service} {page_url} placeholders in a message template.
@@ -16,7 +17,7 @@ function fillTemplate(template, vars = {}) {
 
 /** Build a full wa.me link from a number and an already-filled message. */
 function waLink(number, message) {
-  const digits = String(number || '').replace(/\D/g, '');
+  const digits = normalizeWhatsAppNumber(number);
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
 
@@ -42,4 +43,4 @@ async function buildMessage({ vehicle = null, city = '', service = '', pageUrl =
   });
 }
 
-module.exports = { fillTemplate, waLink, buildMessage };
+module.exports = { fillTemplate, waLink, buildMessage, normalizeWhatsAppNumber };

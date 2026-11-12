@@ -3,6 +3,7 @@
 const nodemailer = require('nodemailer');
 const env = require('../config/env');
 const settings = require('./settings');
+const { normalizeWhatsAppNumber } = require('./phone');
 
 /**
  * Email notifications for new enquiries, over Gmail.
@@ -79,7 +80,7 @@ function buildHtml(enquiry, rows) {
     )
     .join('');
 
-  const waNumber = String(enquiry.phone || '').replace(/\D/g, '');
+  const waNumber = normalizeWhatsAppNumber(enquiry.phone);
 
   return `<!doctype html>
 <html><body style="margin:0;background:#f2efe9;font-family:-apple-system,Segoe UI,Roboto,sans-serif">

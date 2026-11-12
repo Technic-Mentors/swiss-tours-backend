@@ -2,6 +2,7 @@
 
 const { ApiError } = require('../../middleware/errorHandler');
 const settings = require('../../utils/settings');
+const { normalizeWhatsAppNumber } = require('../../utils/phone');
 const mailer = require('../../utils/mailer');
 const v = require('../../middleware/validate');
 
@@ -84,13 +85,14 @@ async function update(req, res) {
 
   // A WhatsApp number with punctuation still has to produce a valid wa.me link.
   if (accepted.whatsapp_number !== undefined) {
-    const digits = String(accepted.whatsapp_number).replace(/\D/g, '');
+    const digits = normalizeWhatsAppNumber(accepted.whatsapp_number);
     if (digits.length < 8) {
       throw ApiError.badRequest(
         'Enter the WhatsApp number in international format, for example +41 79 123 45 67.',
         'bad_whatsapp_number',
       );
     }
+    accepted.whatsapp_number = digits;
   }
 
   await settings.setMany(accepted);

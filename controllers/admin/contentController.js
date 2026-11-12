@@ -5,7 +5,29 @@ const { ApiError } = require('../../middleware/errorHandler');
 const v = require('../../middleware/validate');
 const crud = require('../../utils/crud');
 
-const EDITABLE_PAGES = new Set(['home', 'about', 'footer', 'privacy', 'terms', 'impressum']);
+/* Kept in step with PUBLIC_PAGES in controllers/public/contentController.js:
+   whatever the site reads, the panel edits. */
+const EDITABLE_PAGES = new Set([
+  'home',
+  'about',
+  'vehicles',
+  'services',
+  'gallery',
+  'reviews',
+  'offers',
+  'contact',
+  'book',
+  'vehicle_detail',
+  'service_detail',
+  'city_detail',
+  'category',
+  'not_found',
+  'footer',
+  'legal',
+  'privacy',
+  'terms',
+  'impressum',
+]);
 
 /* ----------------------------------------------------------- content blocks */
 
