@@ -119,7 +119,7 @@ INSERT INTO `content_blocks` (`page_key`, `block_key`, `block_value`, `block_typ
 -- written as "headline | accent | text | background image" - the accent is
 -- the gold line printed under the headline.
 ('home', 'hero_eyebrow',   'Premium chauffeur service', 'text'),
-('home', 'hero_slides',    'WEF Davos 2027,|planned to the minute.|Discreet, security-briefed chauffeurs for delegates, from the airport to every road into Davos.|/wef-davos-hero.png||Always on time,|every time.|Flight tracking and 24/7 dispatch, so you never wait.|/car-3.png||Made for those who|notice details.|Hand-picked vehicles, professional drivers, zero compromise.|/car-4.png||Every journey,|a first-class experience.|Discover Switzerland in comfort with private transfers and tailored chauffeur services.|/slider3.png', 'json'),
+('home', 'hero_slides',    'WEF Davos 2027,|planned to the minute.|Discreet, security-briefed chauffeurs for delegates, from the airport to every road into Davos.|content/hero-wef-davos.webp||Always on time,|every time.|Flight tracking and 24/7 dispatch, so you never wait.|content/hero-always-on-time.webp||Made for those who|notice details.|Hand-picked vehicles, professional drivers, zero compromise.|content/hero-details.webp||Every journey,|a first-class experience.|Discover Switzerland in comfort with private transfers and tailored chauffeur services.|content/hero-every-journey.webp', 'json'),
 ('home', 'hero_slide_seconds', '3', 'text'),
 ('home', 'hero_text',      'Airport transfers, business travel, events and city-to-city rides in Zurich, Geneva, Basel, St. Moritz and beyond - 24/7.', 'text'),
 ('home', 'hero_primary_label',   'Book your ride', 'text'),
@@ -370,13 +370,14 @@ INSERT INTO `faqs` (`id`, `question`, `answer`, `sort_order`, `is_visible`) VALU
 --
 -- Service classes rather than body styles, which is why the same model can
 -- appear in more than one of them. `image` is the cover photo of the first
--- vehicle in the class, the same picture the category card shows.
+-- vehicle in the class, the same picture the category card shows, served
+-- from the backend's uploads folder.
 -- ---------------------------------------------------------------------
 INSERT INTO `vehicle_categories` (`id`, `name`, `slug`, `description`, `image`, `sort_order`, `is_visible`) VALUES
-(1, 'Comfort',   'comfort',    'Comfortable, efficient cars for everyday transfers and city journeys.',         '/images/vehicles/toyota-prius.png',        1, 1),
-(2, 'Business',  'business',   'Executive saloons and vans for meetings, airport runs and group travel.',      '/images/vehicles/mercedes-benz-eclass.png', 2, 1),
-(3, 'Executive', 'first-class','Flagship saloons and the latest vans, for the journeys that matter most.',     '/images/vehicles/mercedes-benz-vclass.png', 3, 1),
-(4, 'Premium',   'premium',    'Our top specification, including reclining VIP seating, for special occasions.','/images/vehicles/mercedes-benz-sclass.png', 4, 1);
+(1, 'Comfort',   'comfort',    'Comfortable, efficient cars for everyday transfers and city journeys.',         'vehicles/toyota-prius.webp',        1, 1),
+(2, 'Business',  'business',   'Executive saloons and vans for meetings, airport runs and group travel.',      'vehicles/mercedes-benz-eclass.webp', 2, 1),
+(3, 'Executive', 'first-class','Flagship saloons and the latest vans, for the journeys that matter most.',     'vehicles/mercedes-benz-vclass.webp', 3, 1),
+(4, 'Premium',   'premium',    'Our top specification, including reclining VIP seating, for special occasions.','vehicles/mercedes-benz-sclass.webp', 4, 1);
 
 -- ---------------------------------------------------------------------
 -- Cities (SEO landing pages)
@@ -455,15 +456,16 @@ INSERT INTO `vehicles`
 -- ---------------------------------------------------------------------
 -- Vehicle photos
 --
--- The cover is what every card, category tile and detail page reads. These
--- paths point at the photos bundled in Frontend/public/images/vehicles, so
--- they work before anything has been uploaded through the admin panel.
+-- The cover is what every card, category tile and detail page reads. The
+-- files themselves ship in db/seed-images and are copied into uploads/ by
+-- scripts/db-setup.js, so these are ordinary backend uploads: the admin
+-- panel can replace them and nothing points at the frontend.
 -- ---------------------------------------------------------------------
 INSERT INTO `vehicle_photos` (`vehicle_id`, `file_path`, `alt_text`, `sort_order`, `is_cover`) VALUES
-(1, '/images/vehicles/toyota-prius.png',        'Toyota Prius or Similar with chauffeur', 1, 1),
-(2, '/images/vehicles/mercedes-benz-eclass.png','Mercedes-Benz E-Class with chauffeur',   1, 1),
-(3, '/images/vehicles/mercedes-benz-sclass.png','Mercedes-Benz S-Class with chauffeur',   1, 1),
-(4, '/images/vehicles/mercedes-benz-vclass.png','Mercedes-Benz V-Class with chauffeur',   1, 1);
+(1, 'vehicles/toyota-prius.webp',        'Toyota Prius or Similar with chauffeur', 1, 1),
+(2, 'vehicles/mercedes-benz-eclass.webp','Mercedes-Benz E-Class with chauffeur',   1, 1),
+(3, 'vehicles/mercedes-benz-sclass.webp','Mercedes-Benz S-Class with chauffeur',   1, 1),
+(4, 'vehicles/mercedes-benz-vclass.webp','Mercedes-Benz V-Class with chauffeur',   1, 1);
 
 -- ---------------------------------------------------------------------
 -- Vehicle specifications
@@ -515,8 +517,8 @@ INSERT INTO `vehicle_cities` (`vehicle_id`, `city_id`) VALUES
 -- ---------------------------------------------------------------------
 -- Services
 --
--- `image` points at the photos bundled in Frontend/public, the same ones
--- the service cards and detail pages show.
+-- `image` is a file in the backend's uploads folder, put there from
+-- db/seed-images when the database is seeded.
 -- ---------------------------------------------------------------------
 INSERT INTO `services`
 (`id`, `name`, `slug`, `short_description`, `full_description`, `included`, `image`, `price_text`, `sort_order`, `is_visible`, `show_on_homepage`) VALUES
@@ -524,49 +526,49 @@ INSERT INTO `services`
  'Meet-and-greet at ZRH, GVA and BSL with free flight tracking.',
  'Our most requested service. Your chauffeur tracks your flight, adjusts for delays at no extra cost, and waits in the arrivals hall with a name sign. Luggage is handled for you and the car is already warm in winter.\n\nWe cover Zurich (ZRH), Geneva (GVA), EuroAirport Basel (BSL), Bern, Lugano, Sion and Samedan, plus cross-border runs to Milan Malpensa and Munich. Departure transfers are timed to the check-in window for your airline and terminal.',
  'Meet-and-greet in the arrivals hall\nFree flight tracking and delay adjustment\n60 minutes free waiting time\nAll tolls, parking and vignette included\nLuggage assistance\nChild seats on request',
- '/airport-transfer.png', 'Fixed price per journey', 1, 1, 1),
+ 'services/airport-transfers.webp', 'Fixed price per journey', 1, 1, 1),
 
 (2, 'Hourly Chauffeur', 'hourly-chauffeur',
  'A car and chauffeur at your disposal, by the hour or by the day.',
  'When the day has several stops, or the schedule is likely to move, hourly hire is simpler than booking individual transfers. The car and chauffeur stay with you, luggage and coats stay in the vehicle, and you leave when you are ready rather than when the next booking says so.\n\nUsed most often for roadshows, property viewings, shopping days and conference schedules. Minimum booking is three hours.',
  'Dedicated car and chauffeur\nUnlimited stops within the hire\nWaiting time included\nAll fuel, tolls and parking\nItinerary changes on the day\nMinimum three hours',
- '/hourly-chauffeur.png', 'Hourly rate, minimum 3 hours', 2, 1, 1),
+ 'services/hourly-chauffeur.webp', 'Hourly rate, minimum 3 hours', 2, 1, 1),
 
 (3, 'Private Transfers', 'city-to-city',
  'Door-to-door across Switzerland and on to Milan, Munich and Lyon.',
  'A private alternative to the train for journeys where the luggage, the timing or the company makes the carriage impractical. Door to door, no changes, and you can work or sleep the whole way.\n\nCommon routes include Zurich to St. Moritz, Geneva to Zermatt, Zurich to Davos, Basel to Lucerne, and cross-border runs to Milan, Munich, Lyon and Stuttgart.',
  'Direct door-to-door journey\nFixed all-inclusive price\nAll tolls, vignettes and border formalities\nComfort stops on request\nWi-Fi on board\nSnow tyres and chains in winter',
- '/private-transfers.png', 'Fixed price per route', 3, 1, 1),
+ 'services/private-transfers.webp', 'Fixed price per route', 3, 1, 1),
 
 (4, 'Business Travel', 'business-travel',
  'Discreet, punctual transport for executives and roadshows.',
  'Corporate travel where reliability matters more than anything else. We hold standing arrangements for regular routes, handle multi-vehicle roadshows, and invoice monthly against a cost centre.\n\nChauffeurs assigned to corporate accounts are briefed on discretion, sign confidentiality agreements where required, and are used to working around a schedule that changes during the day.',
  'Account billing and monthly invoicing\nNamed chauffeurs for regular routes\nMulti-vehicle coordination\nConfidentiality agreements on request\nWi-Fi and charging at every seat\nPriority booking for account holders',
- '/business-travel.png', 'Corporate rates on account', 4, 1, 1),
+ 'services/business-travel.webp', 'Corporate rates on account', 4, 1, 1),
 
 (5, 'Events & WEF', 'events-and-wef',
  'Vehicle coordination for WEF Davos, Art Basel and galas.',
  'Event transport is a logistics problem before it is a driving one. We plan arrival windows, stage vehicles near the venue, and run a single point of contact who knows where every car is.\n\nWe have operated at WEF Davos, Art Basel, the Montreux Jazz Festival, Geneva Motor Show and private galas. For WEF specifically, our chauffeurs are briefed on the access zones and the security procedures, and convoys are planned around the week rather than the journey.',
  'Single coordinator for every vehicle\nVehicles staged near the venue\nWEF access and security briefing\nReal-time schedule changes\nBranded or unmarked vehicles\nOvernight and standby cover',
- '/events.png', 'Quoted per event', 5, 1, 1),
+ 'services/events-and-wef.webp', 'Quoted per event', 5, 1, 1),
 
 (6, 'Day Tours', 'day-tours',
  'Discover Switzerland with private tours and a professional chauffeur.',
  'Explore Switzerland at your own pace with a private chauffeur and a premium vehicle tailored to your journey. From scenic mountain routes and picturesque lakeside towns to charming villages and iconic landmarks, enjoy a comfortable and personalised travel experience.\n\nPlan your day around the places you want to see, with flexible stops for sightseeing, photography, shopping, and dining. Whether you are discovering a new city or enjoying a countryside escape, your chauffeur ensures a smooth, relaxed journey from start to finish.',
  'Private chauffeur and premium vehicle\nFlexible sightseeing stops\nScenic routes across Switzerland\nConvenient hotel pickup and drop-off\nTime for photographs and exploration\nCustomised itineraries on request',
- '/day-tours.png', 'Day Tours Pricing on request', 6, 1, 1),
+ 'services/day-tours.webp', 'Day Tours Pricing on request', 6, 1, 1),
 
 (7, 'Ski Transfers', 'ski-transfers',
  'St. Moritz, Zermatt, Verbier, Gstaad, Davos and more.',
  'Alpine transfers from November to April, in vehicles equipped for the conditions rather than merely permitted in them. Snow tyres as standard, chains carried, and chauffeurs who drive these passes every week of the season.\n\nSki and board carriage is included, and we collect at the chalet door wherever the road allows. For Zermatt we drive to the Tasch terminal and see you onto the shuttle with your luggage.',
  'Snow tyres and chains as standard\nSki and snowboard carriage included\nChalet door collection\nExperienced alpine chauffeurs\nFlight tracking on arrival day\nHeated vehicle waiting for you',
- '/ski-tours.png', 'Fixed price per transfer', 7, 1, 1),
+ 'services/ski-transfers.webp', 'Fixed price per transfer', 7, 1, 1),
 
 (8, '4 Country Tours', 'four-country-tours',
  'Switzerland, Germany, Austria and Liechtenstein in one private journey.',
  'Four countries, one chauffeur, no timetable. Our 4 Country Tour crosses Switzerland, Germany, Austria and Liechtenstein in a single private journey - the Swiss Alps and lakes, the Black Forest and Lake Constance in Germany, the Tyrolean mountains and old towns of Austria, and the castle and vineyards of Vaduz in Liechtenstein.\n\nThe borders are open and your chauffeur handles every one of them, along with the tolls, the vignettes and the routes. Travel as a day trip or over several days, stop wherever the view is worth it, and let the itinerary bend to you rather than the other way round.',
  'Private chauffeur and premium vehicle\nSwitzerland, Germany, Austria and Liechtenstein\nAll border crossings, tolls and vignettes handled\nCustomised multi-country itineraries\nScenic sightseeing stops\nHotel pickup and drop-off\nDay trips or multi-day journeys\nComfortable long-distance travel',
- '/four-country-tours.png', 'Quoted per journey', 8, 1, 1);
+ 'services/four-country-tours.webp', 'Quoted per journey', 8, 1, 1);
 
 -- ---------------------------------------------------------------------
 -- Gallery albums (these are the categories shown on the Gallery page)

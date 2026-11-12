@@ -7,6 +7,7 @@
  *   node scripts/db-setup.js          # schema + seed  (DROPS and recreates the DB)
  *   node scripts/db-setup.js --seed   # seed only
  *   node scripts/db-setup.js --migrate # apply additive migrations; keeps existing data
+ *   node scripts/db-setup.js --images  # only copy db/seed-images into uploads/
  */
 'use strict';
 
@@ -17,11 +18,63 @@ const env = require('../config/env');
 
 const seedOnly = process.argv.includes('--seed');
 const migrateOnly = process.argv.includes('--migrate');
+const imagesOnly = process.argv.includes('--images');
 
 async function runFile(conn, file) {
   const sql = fs.readFileSync(path.join(__dirname, '..', 'db', file), 'utf8');
   await conn.query(sql);
   console.log(`  ran ${file}`);
+}
+
+/**
+ * The seed points vehicles, categories and services at files in uploads/,
+ * so those files have to be there. They ship in db/seed-images - uploads/
+ * itself is gitignored, since everything else in it is uploaded by hand -
+ * and are copied across whenever the database is seeded.
+ *
+ * A file already in uploads/ is left alone: someone who replaced a seeded
+ * picture through the admin panel should not have it overwritten by a
+ * re-seed.
+ */
+function copySeedImages() {
+  const from = path.join(__dirname, '..', 'db', 'seed-images');
+  const to = path.join(__dirname, '..', 'uploads');
+
+  if (!fs.existsSync(from)) {
+    console.log('  no db/seed-images to copy');
+    return;
+  }
+
+  let copied = 0;
+  let kept = 0;
+
+  for (const folder of fs.readdirSync(from)) {
+    const src = path.join(from, folder);
+    if (!fs.statSync(src).isDirectory()) continue;
+
+    const dest = path.join(to, folder);
+    fs.mkdirSync(dest, { recursive: true });
+
+    for (const name of fs.readdirSync(src)) {
+      const target = path.join(dest, name);
+      if (fs.existsSync(target)) {
+        kept += 1;
+        continue;
+      }
+      fs.copyFileSync(path.join(src, name), target);
+      copied += 1;
+    }
+  }
+
+  console.log(`  seed images: ${copied} copied into uploads/${kept ? `, ${kept} already there` : ''}`);
+}
+
+/* Putting the seed pictures in place needs no database, and after a deploy
+   that is often all that is missing. */
+if (imagesOnly) {
+  console.log('Copying seed images into uploads/ ...');
+  copySeedImages();
+  process.exit(0);
 }
 
 (async () => {
@@ -49,6 +102,7 @@ async function runFile(conn, file) {
     console.log('Seeding...');
     await conn.query(`USE \`${env.db.database}\``);
     await runFile(conn, 'seed.sql');
+    copySeedImages();
 
     const [[counts]] = await conn.query(`
       SELECT
